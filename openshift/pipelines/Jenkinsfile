@@ -116,40 +116,40 @@ pipeline {
                 }
             }
         }
-        // stage('Promote to STAGE?') {
-        //     steps {
-        //         timeout(time:15, unit:'MINUTES') {
-        //             input message: "Promote to STAGE?", ok: "Promote"
-        //         }
-        //         script {
-        //             openshift.withCluster() {
-        //                 openshift.tag("${DEV_PROJECT}/${TEMPLATE_NAME}:latest", "${STAGE_PROJECT}/${TEMPLATE_NAME}:${STAGE_TAG}")
-        //             }
-        //         }
-        //     }
-        // }
-        // stage('Rollout to STAGE') {
-        //     steps {
-        //         script {
-        //             openshift.withCluster() {
-        //                 openshift.withProject(STAGE_PROJECT) {
-        //                     if (openshift.selector('dc', '${TEMPLATE_NAME}').exists()) {
-        //                         openshift.selector('dc', '${TEMPLATE_NAME}').delete()
-        //                         openshift.selector('svc', '${TEMPLATE_NAME}').delete()
-        //                         openshift.selector('route', '${TEMPLATE_NAME}').delete()
-        //                     }
-        //                 openshift.newApp("${TEMPLATE_NAME}:${STAGE_TAG}").narrow("svc").expose("--port=${PORT}")
-        //                 }
-        //             }
-        //         } 
-        //     }
-        // }
-        // stage('Scale in STAGE') {
-        //     steps {
-        //         script {
-        //             openshiftScale(namespace: "${STAGE_PROJECT}", deploymentConfig: "${TEMPLATE_NAME}", replicaCount: '3')
-        //         }
-        //     }
-        // }
+        stage('Promote to STAGE?') {
+            steps {
+                timeout(time:15, unit:'MINUTES') {
+                    input message: "Promote to STAGE?", ok: "Promote"
+                }
+                script {
+                    openshift.withCluster() {
+                        openshift.tag("${DEV_PROJECT}/${TEMPLATE_NAME}:latest", "${STAGE_PROJECT}/${TEMPLATE_NAME}:${STAGE_TAG}")
+                    }
+                }
+            }
+        }
+        stage('Rollout to STAGE') {
+            steps {
+                script {
+                    openshift.withCluster() {
+                        openshift.withProject(STAGE_PROJECT) {
+                            if (openshift.selector('dc', '${TEMPLATE_NAME}').exists()) {
+                                openshift.selector('dc', '${TEMPLATE_NAME}').delete()
+                                openshift.selector('svc', '${TEMPLATE_NAME}').delete()
+                                openshift.selector('route', '${TEMPLATE_NAME}').delete()
+                            }
+                        openshift.newApp("${TEMPLATE_NAME}:${STAGE_TAG}").narrow("svc").expose("--port=${PORT}")
+                        }
+                    }
+                } 
+            }
+        }
+        stage('Scale in STAGE') {
+            steps {
+                script {
+                    openshiftScale(namespace: "${STAGE_PROJECT}", deploymentConfig: "${TEMPLATE_NAME}", replicaCount: '3')
+                }
+            }
+        }
     }
 }
